@@ -1,0 +1,60 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" type="image/jpg" href="./img/seta.png" />
+    <title>Mario Kaboom.js</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body style="background-color: black">
+    <div class="musica">
+      <img
+        src="./img/play.png"
+        id="icon"
+        style="
+          width: 5rem;
+          background-color: black;
+          float: right;
+          cursor: pointer;
+        "
+      />
+    </div>
+
+    <script src="https://unpkg.com/kaboom@0.5.0/dist/kaboom.js"></script>
+
+    <script src="game.js"></script>
+
+    <audio id="mySong" loop>
+      <source src="./MarioGame/music/mario.mp3" type="audio/mp3" />
+    </audio>
+
+    <script>
+
+      // Obtén una referencia al elemento de audio
+      const mySong = document.getElementById("mySong");
+
+      // Obtén una referencia al elemento de icono
+      const icon = document.getElementById("icon");
+
+      // Función para iniciar o pausar la canción en respuesta a un clic en el icono
+      function toggleAudio() {
+        if (mySong.paused) {
+          mySong.play();
+          icon.src = "./img/pause.png";
+        } else {
+          mySong.pause();
+          icon.src = "./img/play.png";
+        }
+      }
+
+      // Asigna la función al evento de clic en el icono
+      icon.addEventListener("click", toggleAudio);
+    </script>
+  </body>
+</html>
