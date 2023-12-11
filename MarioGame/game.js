@@ -1,3 +1,4 @@
+// Inicialización de Kaboom
 kaboom({ 
     global: true,
     fullscreen: true,
@@ -5,7 +6,8 @@ kaboom({
     debug: true,
     clearColor: [0, 0, 0, 1],
   });
-  // Identificadores de velocidad
+
+ // Constantes de velocidad y configuración del salto
   const MOVE_SPEED = 200
   const JUMP_FORCE = 360
   const BIG_JUMP_FORCE = 500
@@ -13,11 +15,7 @@ kaboom({
   let isJumping = true //camara en salto
   const FALL_DEATH = 400 
   
-  
-  
-  // Lógica del juego
-  
-  
+  // Carga de sprites
   loadRoot('img/')
   loadSprite( 'coin','coin.png')
   loadSprite('evil-shroom', 'evil-shroom.png')
@@ -31,7 +29,6 @@ kaboom({
   loadSprite('pipe-top-right', 'pipe-top-right.png')
   loadSprite('pipe-bottom-left', 'pipe-bottom-left.png')
   loadSprite('pipe-bottom-right', 'pipe-bottom-right.png')
-  
   loadSprite('blue-block', 'blue-block.png')
   loadSprite('blue-brick', 'blue-brick.png')
   loadSprite('blue-steel', 'blue-steel.png')
@@ -40,11 +37,12 @@ kaboom({
   
   
   // Escena del juego
-  
   scene("game", ({ level, score }) => {
     layers(['bg','obj','ui'], 'obj')
-  
-    const maps = [ //mapa 1
+
+    // Definición de mapas (niveles del juego)
+    // Cada mapa es un array de cadenas que representa una cuadrícula de tiles
+    const maps = [ //Nivel 01
       [ 
         '                                  ',
         '                                  ',
@@ -52,13 +50,13 @@ kaboom({
         '                                  ',
         '                                  ',
         '                                  ',
-        '    %   =*=%=                     ',
+        '    %   =*=%=                    =',
         '                                  ',
         '                        -+        ',
         '                ^   ^   ()        ',
         '==========================   =====',
       ],
-      [ //mapa 2
+      [ //Nivel 02
         '£                                                               $$$                              £',
         '£                                                                                                £',
         '£                                                              =====                             £',
@@ -71,7 +69,7 @@ kaboom({
         '£              z     x x x x     x  x                                           z           ()   £',
         '!!!!!!!!!!!!!!!!!!!!!!!!!!!!   !!!!!!!!!!!!    !!!!!!!!!!    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',
       ],
-      [ //mapa 3
+      [ ////Nivel 03
         '                                                                                                   ',
         '                         $$$$                                                             =        ',
         '                        ====                                                              =        ',
@@ -86,6 +84,8 @@ kaboom({
       ],
     ]
   
+    // Configuración de cada nivel
+    // Define cómo interpretar cada carácter en el mapa
     const levelCfg = {
       width: 20,
       height: 20,
@@ -107,9 +107,11 @@ kaboom({
       'x': [sprite('blue-steel'), solid(), scale(0.5)], 
   
     }
-    //niveles, mapas
+    
+    // Creación del nivel con el primer mapa
     const gameLevel = addLevel(maps[level], levelCfg);
-    //puntaje
+    
+    // Etiquetas de puntaje y nivel
     const scoreLabel = add([
       text(score),
       pos(30, 6),
@@ -122,7 +124,7 @@ kaboom({
     add([text('level ' + parseInt(level +  1)), pos(50,6)])
   
   
-    //Mario grande
+    // Definición de función para hacer al jugador grande o pequeño
     function big() {
       let timer = 0
       let isBig = false
@@ -154,7 +156,7 @@ kaboom({
       }
     }
     
-   //jugador
+   // Jugador
     const player = add([
       sprite('mario'), solid(),
       pos(30, 0),
@@ -162,11 +164,13 @@ kaboom({
       big(),
       origin('bot'),
     ])
-    //movimiento hongo
+
+    //Hongo
     action('mushroom', (m)=>{
       m.move(35,0)
     })
-    // golpear bloque con la cabeza
+
+    //Golpear bloque con salto
     player.on("headbump", (obj) => {
       if (obj.is('coin-surprise')){
         gameLevel.spawn('$', obj.gridPos.sub(0, 1))
@@ -179,25 +183,28 @@ kaboom({
         gameLevel.spawn('}', obj.gridPos.sub(0,0))
       }
     })
-    //chocar hongo
+
+    //Saltar hongo
     player.collides('mushroom', (m)=>{
       destroy(m)
       player.biggify(6)
     })
-    //chocar moneda
+
+    //Obtener moneda
     player.collides('coin', (c) => {
       destroy(c)
       scoreLabel.value++;
       scoreLabel.text = scoreLabel.value
     })
-   //movimiento enemigo
+
+   //Movimiento enemigo
     const ENEMY_SPEED = 30
     
     action('dangerous', (d) =>{
       d.move(-ENEMY_SPEED,0)
     })
   
-    // chocar hongo malvado
+    //Saltar hongo malvado
     player.collides('dangerous', (d) =>{
       if (isJumping){
         destroy(d)
@@ -206,28 +213,26 @@ kaboom({
       }
     })
   
-    //caer del mapa y camara movimiento
-  
+    // Acción para que el jugador caiga del mapa y actualización de la posición de la cámara
     player.action(() => {
       camPos(player.pos)
       if (player.pos.y >= FALL_DEATH) {
         go ('lose', { score: scoreLabel.value})
       }
     })
-  
-    //pasar de nivel 
-  
+    
+    // Colisión con tubería para pasar de nivel
     player.collides('pipe', () =>{
       keyPress('down', () => {
         go('game', { 
-          level: (level + 1) % maps.length, //esto ultimo para que vuelva al nivel inicial
+          level: (level + 1) % maps.length, //Reinicia al nivel inicial
           score: scoreLabel.value
         })
       })
     })
   
   
-    //teclas para moverse
+    // Teclas para mover al jugador
     keyDown('left', () => {
       player.move(-MOVE_SPEED, 0)
     })
@@ -236,13 +241,14 @@ kaboom({
       player.move(MOVE_SPEED, 0)
     })
   
-    // jugador en plataforma
+    // Acción para detectar si el jugador está en una plataforma
     player.action(() => {
       if (player.grounded()) {
         isJumping = false
       }
     })
-  
+
+    // Salto del jugador al presionar la tecla de espacio
     keyPress('space', () =>{
       if(player.grounded()){
         isJumping = true
@@ -253,11 +259,10 @@ kaboom({
   
   })
   
-  //al perder
+  // Escena al perder
   scene('lose', ({ score }) =>{
     add([text(score, 32), origin('center'), pos(width()/2, height()/ 2)])
   })
-
   
-  
+  // Inicio del juego en la escena 'game' con nivel 0 y puntaje inicial 1
   start("game", { level: 0, score: 1})
