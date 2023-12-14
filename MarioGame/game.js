@@ -34,6 +34,10 @@ kaboom({
   loadSprite('blue-steel', 'blue-steel.png')
   loadSprite('blue-evil-shroom', 'blue-evil-shroom.png')
   loadSprite('blue-surprise', 'blue-surprise.png')
+  loadSprite('arrow-right', 'arrow-right.png')
+  loadSprite('arrow-left', 'arrow-left.png')
+  loadSprite('arrow-up', 'arrow-up.png')
+  loadSprite('arrow-down', 'arrow-down.png')
   
   
   // Escena del juego
@@ -108,6 +112,7 @@ kaboom({
   
     }
     
+    
     // Creación del nivel con el primer mapa
     const gameLevel = addLevel(maps[level], levelCfg);
     
@@ -120,9 +125,7 @@ kaboom({
         value: score,
       }
     ])
-  
     add([text('level ' + parseInt(level +  1)), pos(50,6)])
-  
   
     // Definición de función para hacer al jugador grande o pequeño
     function big() {
@@ -164,6 +167,62 @@ kaboom({
       big(),
       origin('bot'),
     ])
+
+    const buttons = {
+      up: add([
+        sprite('arrow-up'), solid(),
+        pos(50, height() - 420),
+        layer('ui'),
+        origin('center'),
+        color(1, 1, 1),
+      ]),
+      down: add([
+        sprite('arrow-down'), solid(),
+        pos(50, height() - 380),
+        layer('ui'),
+        origin('center'),
+        color(1, 1, 1),
+      ]),
+      left: add([
+        sprite('arrow-left'), solid(),
+        pos(20, height() - 400),
+        layer('ui'),
+        origin('center'),
+        color(1, 1, 1),
+      ]),
+      right: add([
+        sprite('arrow-right'), solid(),
+        pos(80, height() - 400),
+        layer('ui'),
+        origin('center'),
+        color(1, 1, 1),
+      ]),
+    };
+  
+
+    // Manejar eventos de clic con collides y mouseClick
+    for (const direction in buttons) {
+      buttons[direction].clicks(() => {
+        movePlayer(direction);
+      });
+    }
+  
+    function movePlayer(direction) {
+      switch (direction) {
+        case 'up':
+          player.move(360, -MOVE_SPEED);
+          break;
+        case 'down':
+          player.move(0, MOVE_SPEED);
+          break;
+        case 'left':
+          player.move(-MOVE_SPEED, 0);
+          break;
+        case 'right':
+          player.move(MOVE_SPEED, 0);
+          break;
+      }
+    }
 
     //Hongo
     action('mushroom', (m)=>{
@@ -231,7 +290,6 @@ kaboom({
       })
     })
   
-  
     // Teclas para mover al jugador
     keyDown('left', () => {
       player.move(-MOVE_SPEED, 0)
@@ -263,6 +321,7 @@ kaboom({
   scene('lose', ({ score }) =>{
     add([text(score, 32), origin('center'), pos(width()/2, height()/ 2)])
   })
+
   
   // Inicio del juego en la escena 'game' con nivel 0 y puntaje inicial 1
   start("game", { level: 0, score: 1})
